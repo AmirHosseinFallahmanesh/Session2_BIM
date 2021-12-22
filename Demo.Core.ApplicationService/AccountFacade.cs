@@ -1,32 +1,49 @@
-﻿using Demo.Core.Contracts;
+﻿using AutoMapper;
+using Demo.Core.Contracts;
 using Demo.Core.Entities;
+using Demo.Core.Entities.DTO;
+using Demo.Infra.Data;
 using System;
+using System.Collections.Generic;
 
 namespace Demo.Core.ApplicationService
 {
     public class AccountFacade : IAccountFacade
     {
-        private readonly IAccountRepository accountRepository;
+    
+        private readonly MyUnitOfWork uow;
+        private readonly IMapper mapper;
 
-        public AccountFacade(IAccountRepository accountRepository)
+        public AccountFacade(MyUnitOfWork myUnitOfWork , IMapper mapper)
         {
-            this.accountRepository = accountRepository;
+        
+            this.uow = myUnitOfWork;
+            this.mapper = mapper;
         }
-        public Guid Transfer(int sourceId, int destId,decimal amount)
+
+        public IEnumerable<AccountDTO> GetAll()
         {
-          Account sourceAccount=  accountRepository.Get(sourceId);
-            if (sourceAccount==null)
+            IEnumerable<Account> accounts = uow.AccountRepository.GetAll();
+            IEnumerable<AccountDTO> result = mapper.
+                  Map<IEnumerable<Account>, IEnumerable<AccountDTO>>(accounts);
+            return result;
+        }
+
+        public Guid Transfer(int sourceId, int destId, decimal amount)
+        {
+            Account sourceAccount = uow.AccountRepository.Get(sourceId);
+            if (sourceAccount == null)
             {
                 throw new NullReferenceException();
             }
 
-            Account destinationAccount = accountRepository.Get(destId);
+            Account destinationAccount = uow.AccountRepository.Get(destId);
             if (destinationAccount == null)
             {
                 throw new NullReferenceException();
             }
 
-            if (sourceAccount.Balance<amount)
+            if (sourceAccount.Balance < amount)
             {
                 throw new InvalidOperationException();
             }
@@ -35,16 +52,17 @@ namespace Demo.Core.ApplicationService
             destinationAccount.Balance += amount;
 
             Transaction transaction1 = new Transaction();
-          
+
             sourceAccount.Transactions.Add(transaction1);
 
 
             Transaction transaction2 = new Transaction();
-           
+
             destinationAccount.Transactions.Add(transaction2);
 
-            accountRepository.Update(sourceAccount);
-            accountRepository.Update(destinationAccount);
+            uow.AccountRepository.Update(sourceAccount);
+            uow.AccountRepository.Update(destinationAccount);
+            uow.SaveChanges();
 
             return transaction1.Id;
         }

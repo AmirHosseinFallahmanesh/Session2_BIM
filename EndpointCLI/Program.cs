@@ -21,13 +21,13 @@ namespace EndpointCLI
             //demoContext.Database.EnsureCreated();
 
             IAccountRepository repository = new AccountRepository(context);
-            IAccountFacade facade = new AccountFacade(repository);
+           // IAccountFacade facade = new AccountFacade(repository);
 
 
 
-            Guid guid= facade.Transfer(1, 2, 4000);
+            //Guid guid= facade.Transfer(1, 2, 4000);
 
-            Console.WriteLine(guid);
+            //Console.WriteLine(guid);
 
         }
     }

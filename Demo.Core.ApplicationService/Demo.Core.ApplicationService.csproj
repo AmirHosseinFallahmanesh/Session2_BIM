@@ -5,7 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Demo.Core.Contracts\Demo.Core.Contracts.csproj" />
+    <ProjectReference Include="..\Demo.Infra.Data\Demo.Infra.Data.csproj" />
   </ItemGroup>
 
 </Project>

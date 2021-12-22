@@ -31,4 +31,31 @@ namespace Demo.Infra.Data
             this.demoContext.SaveChanges();
         }
     }
+
+    public class MyUnitOfWork
+    {
+        private readonly DemoContext demoContext;
+        private AccountRepository accountRepository;
+        public MyUnitOfWork(DemoContext demoContext)
+        {
+            this.demoContext = demoContext;
+        }
+
+        public AccountRepository AccountRepository { get  {
+                if (accountRepository == null)
+                {
+                    accountRepository = new AccountRepository(demoContext);
+                }
+                return accountRepository;
+
+            } 
+        }
+       
+
+        public int SaveChanges()
+        {
+            return this.demoContext.SaveChanges();
+        }
+
+    }
 }

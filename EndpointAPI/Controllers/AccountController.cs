@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Demo.Core.Contracts;
-using Microsoft.AspNetCore.Http;
+using Demo.Core.Entities.DTO;
+using EndpointAPI.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EndpointAPI.Controllers
@@ -20,8 +19,27 @@ namespace EndpointAPI.Controllers
         }
 
         [HttpGet]
-        public void Get()
+        public IActionResult GetAll()
         {
+            ResponceViewModel<IEnumerable<AccountDTO>> model =
+                new ResponceViewModel<IEnumerable<AccountDTO>>();
+
+            try
+            {
+                model.Data= accountFacade.GetAll();
+                model.StatusCode = 200;
+                
+            }
+            catch (Exception ex)
+            {
+
+                model.Errors.Add(ex.Message);
+                model.IsSuccess = false;
+                model.StatusCode = 400;
+                return BadRequest(model);
+            }
+            return Ok(model);
+
 
         }
 
@@ -30,7 +48,23 @@ namespace EndpointAPI.Controllers
         [HttpPost]
         public IActionResult Post(TransferDTO dto)
         {
-            return Ok(accountFacade.Transfer(dto.sourceId, dto.destId, dto.balance));
+            ResponceViewModel<Guid> model = new ResponceViewModel<Guid>();
+            try
+            {
+               
+                model.Data = accountFacade.Transfer(dto.sourceId, dto.destId, dto.balance);
+                model.StatusCode = 201;
+                return Created($"api/account/{model.Data}", model);
+            }
+            catch (Exception ex)
+            {
+                model.Errors.Add(ex.Message);
+                model.IsSuccess = false;
+                model.StatusCode = 400;
+                return BadRequest(model);
+            }
+           
+         
         }
     }
 }
