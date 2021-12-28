@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace EndpointAPI
 {
@@ -40,8 +41,10 @@ namespace EndpointAPI
             services.AddScoped<MyUnitOfWork>();
             services.AddDbContext<DemoContext>(option => 
             option.UseSqlServer(Configuration.GetConnectionString("default")));
-         
 
+            services.AddSwaggerGen(c => {
+                c.SwaggerDoc("v1", new Info { Title = "Accpunt API", Version = "V1.0.0" });
+            });
             services.AddScoped<IAccountRepository, AccountRepository>();
         
             services.AddScoped<IAccountFacade, AccountFacade>();
@@ -61,6 +64,11 @@ namespace EndpointAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", " API V1");
+            });
 
             app.UseMvc();
         }
