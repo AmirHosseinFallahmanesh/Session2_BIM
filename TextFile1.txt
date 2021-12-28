@@ -1,0 +1,74 @@
+
+   public interface IDbContext
+    {
+
+        DbSet<TEntity> Set<TEntity>() where TEntity : class;
+        int SaveChanges();
+        void Dispose();
+
+    }
+--------------------------------------------------------------
+public class TseContext:DbContext, IUnitOfwork
+    {
+     
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer("Data Source =.; Initial Catalog = TseDemo1; Integrated Security = True; "); 
+            base.OnConfiguring(optionsBuilder);
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfiguration(new TseModelConfig());
+            modelBuilder.ApplyConfiguration(new TseDataModelsConfig());
+            modelBuilder.ApplyConfiguration(new RoleModelConfig());
+            modelBuilder.ApplyConfiguration(new UserModelConfig());
+            base.OnModelCreating(modelBuilder);
+        }
+
+  
+
+        
+
+        int IUnitOfwork.SaveChange()
+        {
+            return base.SaveChanges();
+        }
+
+        DbSet<TEntity> IUnitOfwork.Set<TEntity>()
+        {
+            return base.Set<TEntity>();
+        }
+
+        EntityEntry<TEntity> IUnitOfwork.SetEntry<TEntity>(TEntity entity)
+        {
+            return base.Entry<TEntity>(entity);
+        }
+
+        public TseContext()
+        {
+            TseModel T = new TseModel();
+            var a = Entry(T);
+            
+        }
+		}
+-------------------------------------------------------------------
+public class TseModelService: ITseModelService
+    {
+        private readonly IUnitOfwork uow;
+        
+        public TseModelService(IUnitOfwork unitOfWork)
+        {
+            this.uow = unitOfWork;
+        }
+        public List<TseModel>GetAll()
+        {
+            return uow.Set<TseModel>().ToList();
+        }
+
+        public TseModel FindBySymbol(string Symbol)
+        {
+            return uow.Set<TseModel>().SingleOrDefault(a=>a.SymbiolISIN==Symbol);
+        }
+		}
